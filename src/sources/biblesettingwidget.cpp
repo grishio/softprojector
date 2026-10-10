@@ -590,7 +590,10 @@ void BibleSettingWidget::updateSecondaryBibleMenu()
     secondary_bibles.removeOne(pbible);
 
     secondary_id_list = bible_id_list;
-    secondary_id_list.removeAt(ui->comboBoxPrimaryBible->currentIndex());
+    // No Bibles or a missing saved Bible leaves the primary index at -1.
+    const int primaryIndex = ui->comboBoxPrimaryBible->currentIndex();
+    if (primaryIndex >= 0 && primaryIndex < secondary_id_list.size())
+        secondary_id_list.removeAt(primaryIndex);
     ui->comboBoxSecondaryBible->clear();
     ui->comboBoxSecondaryBible->addItem(tr("None"));
     ui->comboBoxSecondaryBible->addItems(secondary_bibles);
@@ -611,7 +614,9 @@ void BibleSettingWidget::updateSecondaryBibleMenu2()
     secondary_bibles2.removeOne(pbible);
 
     secondary_id_list2 = bible_id_list;
-    secondary_id_list2.removeAt(ui->comboBoxPrimaryBible2->currentIndex());
+    const int primaryIndex = ui->comboBoxPrimaryBible2->currentIndex();
+    if (primaryIndex >= 0 && primaryIndex < secondary_id_list2.size())
+        secondary_id_list2.removeAt(primaryIndex);
     ui->comboBoxSecondaryBible2->clear();
     ui->comboBoxSecondaryBible2->addItem(tr("None"));
     ui->comboBoxSecondaryBible2->addItems(secondary_bibles2);
@@ -632,7 +637,9 @@ void BibleSettingWidget::updateSecondaryBibleMenu3()
     secondary_bibles3.removeOne(pbible);
 
     secondary_id_list3 = bible_id_list;
-    secondary_id_list3.removeAt(ui->comboBoxPrimaryBible3->currentIndex());
+    const int primaryIndex = ui->comboBoxPrimaryBible3->currentIndex();
+    if (primaryIndex >= 0 && primaryIndex < secondary_id_list3.size())
+        secondary_id_list3.removeAt(primaryIndex);
     ui->comboBoxSecondaryBible3->clear();
     ui->comboBoxSecondaryBible3->addItem(tr("None"));
     ui->comboBoxSecondaryBible3->addItems(secondary_bibles3);
@@ -653,7 +660,9 @@ void BibleSettingWidget::updateSecondaryBibleMenu4()
     secondary_bibles4.removeOne(pbible);
 
     secondary_id_list4 = bible_id_list;
-    secondary_id_list4.removeAt(ui->comboBoxPrimaryBible4->currentIndex());
+    const int primaryIndex = ui->comboBoxPrimaryBible4->currentIndex();
+    if (primaryIndex >= 0 && primaryIndex < secondary_id_list4.size())
+        secondary_id_list4.removeAt(primaryIndex);
     ui->comboBoxSecondaryBible4->clear();
     ui->comboBoxSecondaryBible4->addItem(tr("None"));
     ui->comboBoxSecondaryBible4->addItems(secondary_bibles4);
@@ -667,7 +676,7 @@ void BibleSettingWidget::updateSecondaryBibleMenu4()
 
 void BibleSettingWidget::updateTrinaryBibleMenu()
 {
-    if (ui->comboBoxSecondaryBible->currentIndex() == 0)
+    if (ui->comboBoxSecondaryBible->currentIndex() <= 0)
     {
         ui->comboBoxTrinaryBible->setCurrentIndex(0);
         ui->comboBoxTrinaryBible->setEnabled(false);
@@ -695,7 +704,7 @@ void BibleSettingWidget::updateTrinaryBibleMenu()
 
 void BibleSettingWidget::updateTrinaryBibleMenu2()
 {
-    if (ui->comboBoxSecondaryBible2->currentIndex() == 0)
+    if (ui->comboBoxSecondaryBible2->currentIndex() <= 0)
     {
         ui->comboBoxTrinaryBible2->setCurrentIndex(0);
         ui->comboBoxTrinaryBible2->setEnabled(false);
@@ -723,7 +732,7 @@ void BibleSettingWidget::updateTrinaryBibleMenu2()
 
 void BibleSettingWidget::updateTrinaryBibleMenu3()
 {
-    if (ui->comboBoxSecondaryBible3->currentIndex() == 0)
+    if (ui->comboBoxSecondaryBible3->currentIndex() <= 0)
     {
         ui->comboBoxTrinaryBible3->setCurrentIndex(0);
         ui->comboBoxTrinaryBible3->setEnabled(false);
@@ -751,7 +760,7 @@ void BibleSettingWidget::updateTrinaryBibleMenu3()
 
 void BibleSettingWidget::updateTrinaryBibleMenu4()
 {
-    if (ui->comboBoxSecondaryBible4->currentIndex() == 0)
+    if (ui->comboBoxSecondaryBible4->currentIndex() <= 0)
     {
         ui->comboBoxTrinaryBible4->setCurrentIndex(0);
         ui->comboBoxTrinaryBible4->setEnabled(false);
@@ -785,7 +794,9 @@ void BibleSettingWidget::updateOperatorBibleMenu()
     operator_bibles.removeOne(pbible);
 
     operator_id_list = bible_id_list;
-    operator_id_list.removeAt(ui->comboBoxPrimaryBible->currentIndex());
+    const int primaryIndex = ui->comboBoxPrimaryBible->currentIndex();
+    if (primaryIndex >= 0 && primaryIndex < operator_id_list.size())
+        operator_id_list.removeAt(primaryIndex);
     ui->comboBoxOperatorBible->clear();
     ui->comboBoxOperatorBible->addItem(tr("Same as primary Bible"));
     ui->comboBoxOperatorBible->addItems(operator_bibles);
