@@ -17,7 +17,7 @@
 //
 ***************************************************************************/
 
-#include "../3rdparty/headers/qmediaplaylist.h"
+#include "../../3rdparty/headers/qmediaplaylist.h"
 #include "../headers/projectordisplayscreen.hpp"
 #include "ui_projectordisplayscreen.h"
 

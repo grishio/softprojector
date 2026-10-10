@@ -14,7 +14,7 @@
    <string>Slide Show Editor</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="softprojector.qrc">
+   <iconset resource="../softprojector.qrc">
     <normaloff>:/icons/icons/slideshow_edit.png</normaloff>:/icons/icons/slideshow_edit.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
@@ -79,7 +79,7 @@
         <string>Add Pictures</string>
        </property>
        <property name="icon">
-        <iconset resource="softprojector.qrc">
+        <iconset resource="../softprojector.qrc">
          <normaloff>:/icons/icons/add.png</normaloff>:/icons/icons/add.png</iconset>
        </property>
       </widget>
@@ -90,7 +90,7 @@
         <string>Remove Picture</string>
        </property>
        <property name="icon">
-        <iconset resource="softprojector.qrc">
+        <iconset resource="../softprojector.qrc">
          <normaloff>:/icons/icons/remove.png</normaloff>:/icons/icons/remove.png</iconset>
        </property>
       </widget>
@@ -101,7 +101,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="softprojector.qrc">
+        <iconset resource="../softprojector.qrc">
          <normaloff>:/icons/icons/up.png</normaloff>:/icons/icons/up.png</iconset>
        </property>
       </widget>
@@ -112,7 +112,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="softprojector.qrc">
+        <iconset resource="../softprojector.qrc">
          <normaloff>:/icons/icons/down.png</normaloff>:/icons/icons/down.png</iconset>
        </property>
       </widget>
@@ -228,7 +228,7 @@
   <tabstop>pushButtonCancel</tabstop>
  </tabstops>
  <resources>
-  <include location="softprojector.qrc"/>
+  <include location="../softprojector.qrc"/>
  </resources>
  <connections/>
 </ui>

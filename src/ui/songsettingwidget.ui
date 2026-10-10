@@ -369,7 +369,7 @@
          <string>Apply this background to all active backgrounds.</string>
         </property>
         <property name="icon">
-         <iconset resource="softprojector.qrc">
+         <iconset resource="../softprojector.qrc">
           <normaloff>:/icons/icons/common.png</normaloff>:/icons/icons/common.png</iconset>
         </property>
        </widget>
@@ -4434,7 +4434,7 @@
   <tabstop>pushButtonDefault</tabstop>
  </tabstops>
  <resources>
-  <include location="softprojector.qrc"/>
+  <include location="../softprojector.qrc"/>
  </resources>
  <connections/>
 </ui>

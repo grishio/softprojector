@@ -24,14 +24,14 @@
 //#include <phonon>
 //#include <phonon/MediaObject>
 //#include <phonon/VideoWidget>
-#include "settings.h"
-#include "theme.h"
-#include "controlbutton.h"
-#include "bible.h"
-#include "song.h"
-#include "announcewidget.h"
-#include "videoinfo.h"
-#include "displaysetting.h"
+#include "settings.hpp"
+#include "theme.hpp"
+#include "controlbutton.hpp"
+#include "bible.hpp"
+#include "song.hpp"
+#include "announcewidget.hpp"
+#include "videoinfo.hpp"
+#include "displaysetting.hpp"
 
 namespace Ui {
 class DisplayScreen;

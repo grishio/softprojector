@@ -14,7 +14,7 @@
    <string>Edit Announcement</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="softprojector.qrc">
+   <iconset resource="../softprojector.qrc">
     <normaloff>:/icons/icons/announce_edit.png</normaloff>:/icons/icons/announce_edit.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -167,7 +167,7 @@
   <tabstop>textEditAnnouncement</tabstop>
  </tabstops>
  <resources>
-  <include location="softprojector.qrc"/>
+  <include location="../softprojector.qrc"/>
  </resources>
  <connections/>
 </ui>

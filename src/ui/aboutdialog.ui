@@ -44,7 +44,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap resource="softprojector.qrc">:/icons/icons/softprojector_cloud.png</pixmap>
+          <pixmap resource="../softprojector.qrc">:/icons/icons/softprojector_cloud.png</pixmap>
          </property>
         </widget>
        </item>
@@ -547,7 +547,7 @@ or would like to contribute data, please visit:&lt;br&gt;
   </layout>
  </widget>
  <resources>
-  <include location="softprojector.qrc"/>
+  <include location="../softprojector.qrc"/>
  </resources>
  <connections/>
 </ui>

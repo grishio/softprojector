@@ -42,7 +42,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="softprojector.qrc">
+        <iconset resource="../softprojector.qrc">
          <normaloff>:/icons/icons/stop.png</normaloff>:/icons/icons/stop.png</iconset>
        </property>
       </widget>
@@ -53,7 +53,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="softprojector.qrc">
+        <iconset resource="../softprojector.qrc">
          <normaloff>:/icons/icons/play.png</normaloff>:/icons/icons/play.png</iconset>
        </property>
       </widget>
@@ -64,7 +64,7 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="softprojector.qrc">
+        <iconset resource="../softprojector.qrc">
          <normaloff>:/icons/icons/speaker.png</normaloff>:/icons/icons/speaker.png</iconset>
        </property>
        <property name="checkable">
@@ -97,7 +97,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="softprojector.qrc"/>
+  <include location="../softprojector.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -14,7 +14,7 @@
    <string>Bible Information</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="softprojector.qrc">
+   <iconset resource="../softprojector.qrc">
     <normaloff>:/icons/icons/book.png</normaloff>:/icons/icons/book.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
@@ -91,7 +91,7 @@ Copyright:</string>
   </layout>
  </widget>
  <resources>
-  <include location="softprojector.qrc"/>
+  <include location="../softprojector.qrc"/>
  </resources>
  <connections>
   <connection>

@@ -14,7 +14,7 @@
    <string>Song Counter</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="softprojector.qrc">
+   <iconset resource="../softprojector.qrc">
     <normaloff>:/icons/icons/song_count.png</normaloff>:/icons/icons/song_count.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
@@ -81,7 +81,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="softprojector.qrc"/>
+  <include location="../softprojector.qrc"/>
  </resources>
  <connections/>
 </ui>

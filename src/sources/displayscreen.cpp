@@ -17,7 +17,7 @@
 //
 ***************************************************************************/
 
-#include "../headers/displayscreen.h"
+#include "../headers/displayscreen.hpp"
 #include "ui_displayscreen.h"
 
 #define BLUR_RADIUS 5

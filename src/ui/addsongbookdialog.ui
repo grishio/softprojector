@@ -14,7 +14,7 @@
    <string>Add songbook</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="softprojector.qrc">
+   <iconset resource="../softprojector.qrc">
     <normaloff>:/icons/icons/add_songbook.png</normaloff>:/icons/icons/add_songbook.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -83,7 +83,7 @@
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources>
-  <include location="softprojector.qrc"/>
+  <include location="../softprojector.qrc"/>
  </resources>
  <connections>
   <connection>

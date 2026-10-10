@@ -59,7 +59,7 @@
             <string>Go Live (F5)</string>
            </property>
            <property name="icon">
-            <iconset resource="softprojector.qrc">
+            <iconset resource="../softprojector.qrc">
              <normaloff>:/icons/icons/go_live.png</normaloff>:/icons/icons/go_live.png</iconset>
            </property>
            <property name="shortcut">
@@ -112,7 +112,7 @@
   <tabstop>pushButtonGoLive</tabstop>
  </tabstops>
  <resources>
-  <include location="softprojector.qrc"/>
+  <include location="../softprojector.qrc"/>
  </resources>
  <connections/>
 </ui>

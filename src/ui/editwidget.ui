@@ -20,7 +20,7 @@
    <string>Edit and/or Add New songs</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="softprojector.qrc">
+   <iconset resource="../softprojector.qrc">
     <normaloff>:/icons/icons/edit.png</normaloff>:/icons/icons/edit.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -62,7 +62,7 @@
         <string>Print</string>
        </property>
        <property name="icon">
-        <iconset resource="softprojector.qrc">
+        <iconset resource="../softprojector.qrc">
          <normaloff>:/icons/icons/print.png</normaloff>:/icons/icons/print.png</iconset>
        </property>
       </widget>
@@ -648,7 +648,7 @@
   <tabstop>btnCancel</tabstop>
  </tabstops>
  <resources>
-  <include location="softprojector.qrc"/>
+  <include location="../softprojector.qrc"/>
  </resources>
  <connections/>
 </ui>

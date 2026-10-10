@@ -30,7 +30,7 @@
      <item>
       <widget class="QLabel" name="labelExpand">
        <property name="pixmap">
-        <pixmap resource="softprojector.qrc">:/icons/icons/ExpandSmall.png</pixmap>
+        <pixmap resource="../softprojector.qrc">:/icons/icons/ExpandSmall.png</pixmap>
        </property>
       </widget>
      </item>
@@ -61,7 +61,7 @@
      <item>
       <widget class="QLabel" name="labelFit">
        <property name="pixmap">
-        <pixmap resource="softprojector.qrc">:/icons/icons/FitToScreen.png</pixmap>
+        <pixmap resource="../softprojector.qrc">:/icons/icons/FitToScreen.png</pixmap>
        </property>
       </widget>
      </item>
@@ -92,7 +92,7 @@
      <item>
       <widget class="QLabel" name="labelFitExpand">
        <property name="pixmap">
-        <pixmap resource="softprojector.qrc">:/icons/icons/FitToScreenByExpanding.png</pixmap>
+        <pixmap resource="../softprojector.qrc">:/icons/icons/FitToScreenByExpanding.png</pixmap>
        </property>
       </widget>
      </item>
@@ -245,7 +245,7 @@ We recommend to resize images to display screen size.</string>
   <tabstop>lineEditBound</tabstop>
  </tabstops>
  <resources>
-  <include location="softprojector.qrc"/>
+  <include location="../softprojector.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -14,7 +14,7 @@
    <string>softProjector - Settings</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="softprojector.qrc">
+   <iconset resource="../softprojector.qrc">
     <normaloff>:/icons/icons/settings.png</normaloff>:/icons/icons/settings.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
@@ -52,7 +52,7 @@
        <string>General</string>
       </property>
       <property name="icon">
-       <iconset resource="softprojector.qrc">
+       <iconset resource="../softprojector.qrc">
         <normaloff>:/icons/icons/softprojector.png</normaloff>:/icons/icons/softprojector.png</iconset>
       </property>
      </item>
@@ -61,7 +61,7 @@
        <string>Passive</string>
       </property>
       <property name="icon">
-       <iconset resource="softprojector.qrc">
+       <iconset resource="../softprojector.qrc">
         <normaloff>:/icons/icons/display.png</normaloff>:/icons/icons/display.png</iconset>
       </property>
      </item>
@@ -70,7 +70,7 @@
        <string>Bible</string>
       </property>
       <property name="icon">
-       <iconset resource="softprojector.qrc">
+       <iconset resource="../softprojector.qrc">
         <normaloff>:/icons/icons/book.png</normaloff>:/icons/icons/book.png</iconset>
       </property>
      </item>
@@ -79,7 +79,7 @@
        <string>Songs</string>
       </property>
       <property name="icon">
-       <iconset resource="softprojector.qrc">
+       <iconset resource="../softprojector.qrc">
         <normaloff>:/icons/icons/song_tab.png</normaloff>:/icons/icons/song_tab.png</iconset>
       </property>
      </item>
@@ -88,7 +88,7 @@
        <string>Picture</string>
       </property>
       <property name="icon">
-       <iconset resource="softprojector.qrc">
+       <iconset resource="../softprojector.qrc">
         <normaloff>:/icons/icons/photo.png</normaloff>:/icons/icons/photo.png</iconset>
       </property>
      </item>
@@ -97,7 +97,7 @@
        <string>Announcements</string>
       </property>
       <property name="icon">
-       <iconset resource="softprojector.qrc">
+       <iconset resource="../softprojector.qrc">
         <normaloff>:/icons/icons/announce.png</normaloff>:/icons/icons/announce.png</iconset>
       </property>
      </item>
@@ -490,7 +490,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="softprojector.qrc"/>
+  <include location="../softprojector.qrc"/>
  </resources>
  <connections/>
 </ui>
