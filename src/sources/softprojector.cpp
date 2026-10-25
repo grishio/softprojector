@@ -125,6 +125,8 @@ SoftProjector::SoftProjector(QWidget *parent)
     connect(settingsDialog,SIGNAL(positionsDisplayWindow()),this,SLOT(positionDisplayWindow()));
     connect(settingsDialog,SIGNAL(updateScreen()),this,SLOT(updateScreen()));
     connect(settingsDialog,SIGNAL(httpServerState(bool&,QString&,int&,int&)),this,SLOT(httpServerState(bool&,QString&,int&,int&)));
+    connect(settingsDialog, &SettingsDialog::aiBibleSettingsChanged, bibleWidget, &BibleWidget::loadAiAssistantSettings);
+    bibleWidget->loadAiAssistantSettings();
     connect(songWidget,SIGNAL(addToSchedule(Song&)),this,SLOT(addToShcedule(Song&)));
     connect(announceWidget,SIGNAL(addToSchedule(Announcement&)),this,SLOT(addToShcedule(Announcement&)));
 
@@ -175,6 +177,12 @@ SoftProjector::SoftProjector(QWidget *parent)
     connect(shpgDwn,SIGNAL(activated()),this,SLOT(nextSlide()));
     connect(shSart1,SIGNAL(activated()),this,SLOT(on_actionShow_triggered()));
     connect(shSart2,SIGNAL(activated()),this,SLOT(on_actionShow_triggered()));
+    // F5: send the current (AI-preselected) Bible verse live.
+    auto *shBibleLive = new QShortcut(QKeySequence(Qt::Key_F5), this);
+    connect(shBibleLive, &QShortcut::activated, this, [this]() {
+        ui->projectTab->setCurrentWidget(bibleWidget);
+        bibleWidget->goLiveWithCurrentSelection();
+    });
 
     // Hide Multi verse selection, only visible to be when showing bible
     ui->widgetMultiVerse->setVisible(false);

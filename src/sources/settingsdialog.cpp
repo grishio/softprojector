@@ -20,6 +20,8 @@
 #include <QtSql>
 #include "../headers/settingsdialog.hpp"
 #include "ui_settingsdialog.h"
+#include <QScrollArea>
+#include <QFrame>
 
 SettingsDialog::SettingsDialog(QWidget *parent) :
     QDialog(parent),
@@ -41,8 +43,15 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->scrollAreaAnnouncementSettings->setWidget(announcementSettingswidget);
     openAiSettingsWidget = new OpenAiSettingsWidget(this);
     ui->stackedWidget->addWidget(openAiSettingsWidget);
-    new QListWidgetItem(QIcon(":/icons/icons/translation.png"), tr("OpenAI Translation"), ui->listWidget);
+    openAiItem = new QListWidgetItem(QIcon(":/icons/icons/translation.png"), tr("OpenAI Translation"), ui->listWidget);
     connect(this, &QDialog::finished, openAiSettingsWidget, &OpenAiSettingsWidget::cancelRequest);
+    aiBibleSettingsWidget = new AiBibleSettingsWidget(this);
+    auto *aiBibleScroll = new QScrollArea(this);
+    aiBibleScroll->setWidgetResizable(true);
+    aiBibleScroll->setFrameShape(QFrame::NoFrame);
+    aiBibleScroll->setWidget(aiBibleSettingsWidget);
+    ui->stackedWidget->addWidget(aiBibleScroll);
+    aiBibleItem = new QListWidgetItem(QIcon(":/icons/icons/book.png"), tr("AI Bible Assistant"), ui->listWidget);
 
     btnOk = new QPushButton(tr("OK"));
     btnCancel = new QPushButton(tr("Cancel"));
@@ -93,6 +102,7 @@ void SettingsDialog::loadSettings(GeneralSettings &sets, Theme &thm, SlideShowSe
     bibleSettingswidget->setBibleVersions(bsettings,bsettings2,bsettings3,bsettings4);
     pictureSettingWidget->setSettings(ssettings);
     openAiSettingsWidget->loadSettings();
+    aiBibleSettingsWidget->loadSettings();
     setThemes();
 }
 
@@ -117,7 +127,8 @@ void SettingsDialog::changeEvent(QEvent *e)
     switch ( e->type() ) {
     case QEvent::LanguageChange:
         ui->retranslateUi(this);
-        ui->listWidget->item(ui->listWidget->count() - 1)->setText(tr("OpenAI Translation"));
+        openAiItem->setText(tr("OpenAI Translation"));
+        aiBibleItem->setText(tr("AI Bible Assistant"));
         break;
     default:
         break;
@@ -170,6 +181,14 @@ bool SettingsDialog::applySettings()
 {
     if (!openAiSettingsWidget->saveSettings())
         return false;
+    bool aiBibleChanged = false;
+    if (!aiBibleSettingsWidget->saveSettings(&aiBibleChanged))
+    {
+        ui->listWidget->setCurrentItem(aiBibleItem);
+        return false;
+    }
+    if (aiBibleChanged)
+        emit aiBibleSettingsChanged();
     gsettings = generalSettingswidget->getSettings();
     bibleSettingswidget->getBibleVersions(bsettings,bsettings2,bsettings3,bsettings4);
     pictureSettingWidget->getSettings(ssettings);

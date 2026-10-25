@@ -96,6 +96,13 @@ public slots:
     void getVerseRef(QString vId, QString &book, int &chapter, int &verse);
     int getVerseNumberLast(QString vId);
     QStringList getChapter(int book, int chapter);
+    // Number of distinct verses in a chapter of the operator Bible, without
+    // touching the preview lists.
+    int verseCount(int book, int chapter) const;
+    // Largest verse number anywhere in the operator Bible.
+    int maxVerseNumber() const;
+    // Verse count of every chapter, keyed by book id (index 0 = chapter 1).
+    QHash<int, QList<int> > allVerseCounts() const;
     void getVerseAndCaption(QString &verse, QString &caption, QString verId, QString &bibId, bool useAbbr);
     int getCurrentBookRow(QString book);
     Verse getCurrentVerseAndCaption(QList<int> currentRows, BibleSettings& sets, BibleVersionSettings& bv);

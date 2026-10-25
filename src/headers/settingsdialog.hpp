@@ -30,6 +30,7 @@
 #include "announcementsettingwidget.hpp"
 #include "picturesettingwidget.hpp"
 #include "openaisettingswidget.hpp"
+#include "aibiblesettingswidget.hpp"
 
 namespace Ui {
 class SettingsDialog;
@@ -56,6 +57,7 @@ signals:
     void positionsDisplayWindow();
     void updateScreen();
     void httpServerState(bool& state, QString& httpServerIPAddress, int& httpServerPort, int& webSocketServerPort);
+    void aiBibleSettingsChanged();
 
 private:
     Ui::SettingsDialog *ui;
@@ -86,6 +88,9 @@ private:
     PictureSettingWidget *pictureSettingWidget;
     AnnouncementSettingWidget *announcementSettingswidget;
     OpenAiSettingsWidget *openAiSettingsWidget;
+    AiBibleSettingsWidget *aiBibleSettingsWidget;
+    QListWidgetItem *openAiItem;
+    QListWidgetItem *aiBibleItem;
 
     QPushButton *btnOk;
     QPushButton *btnCancel;

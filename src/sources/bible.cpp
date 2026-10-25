@@ -166,6 +166,50 @@ QStringList Bible::getChapter(int book, int chapter)
     return verseList;
 }
 
+int Bible::verseCount(int book, int chapter) const
+{
+    int count(0), last(-1);
+    foreach (const BibleVerse &bv, operatorBible)
+    {
+        if(bv.book == book && bv.chapter == chapter && bv.verseNumber != last)
+        {
+            ++count;
+            last = bv.verseNumber;
+        }
+    }
+    return count;
+}
+
+int Bible::maxVerseNumber() const
+{
+    int maxVerse(0);
+    foreach (const BibleVerse &bv, operatorBible)
+        maxVerse = qMax(maxVerse, bv.verseNumber);
+    return maxVerse;
+}
+
+QHash<int, QList<int> > Bible::allVerseCounts() const
+{
+    QHash<int, QList<int> > counts;
+    int lastBook(-1), lastChapter(-1), lastVerse(-1);
+    foreach (const BibleVerse &bv, operatorBible)
+    {
+        // Split verses share a verse number on consecutive rows; count them once.
+        if(bv.book == lastBook && bv.chapter == lastChapter && bv.verseNumber == lastVerse)
+            continue;
+        lastBook = bv.book;
+        lastChapter = bv.chapter;
+        lastVerse = bv.verseNumber;
+        if(bv.chapter < 1)
+            continue;
+        QList<int> &list = counts[bv.book];
+        while(list.size() < bv.chapter)
+            list.append(0);
+        list[bv.chapter - 1]++;
+    }
+    return counts;
+}
+
 Verse Bible::getCurrentVerseAndCaption(QList<int>  currentRows, BibleSettings& sets, BibleVersionSettings &bv)
 {
     QString verse_id;

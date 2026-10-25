@@ -96,6 +96,10 @@ SOURCES += sources/main.cpp \
     sources/httpserver.cpp \
     sources/websocketserver.cpp
 SOURCES += sources/openaisettings.cpp \
+    sources/aibiblesettings.cpp \
+    sources/aibiblesettingswidget.cpp \
+    sources/transcriptstream.cpp \
+    sources/biblereferenceassistant.cpp \
     sources/songtranslation.cpp \
     sources/openaiclient.cpp \
     sources/openaisettingswidget.cpp \
@@ -149,6 +153,10 @@ HEADERS += headers/softprojector.hpp \
     headers/httpserver.hpp \
     headers/websocketserver.hpp
 HEADERS += headers/openaisettings.hpp \
+    headers/aibiblesettings.hpp \
+    headers/aibiblesettingswidget.hpp \
+    headers/transcriptstream.hpp \
+    headers/biblereferenceassistant.hpp \
     headers/songtranslation.hpp \
     headers/openaiclient.hpp \
     headers/openaisettingswidget.hpp \

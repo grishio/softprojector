@@ -26,12 +26,20 @@
 #include "bible.hpp"
 #include "highlight.hpp"
 #include "settings.hpp"
+#include "aibiblesettings.hpp"
+#include "biblereferenceassistant.hpp"
+
+class QCheckBox;
+class QFrame;
+class QLabel;
+class QPlainTextEdit;
+class TranscriptStream;
 
 namespace Ui {
 class BibleWidget;
 }
 
-class BibleWidget : public QWidget {
+class BibleWidget : public QWidget, public BibleSelectionProvider {
     Q_OBJECT
     Q_DISABLE_COPY(BibleWidget)
 public:
@@ -46,6 +54,13 @@ public:
     QStringList currentChapterList;
 
     int getCurrentChapter();
+
+    // BibleSelectionProvider (AI Bible assistant)
+    QList<BibleBookInfo> assistantBooks() const override;
+    int assistantVerseCount(const QString &book, int chapter) const override;
+    int assistantMaxVerses() const override;
+    BibleSelection assistantSelection() const override;
+    bool assistantPaused() const override;
 
 public slots:
     QByteArray getHiddenSplitterState();
@@ -62,6 +77,10 @@ public slots:
     bool isVerseSelected();
     void setBibleBookActive();
     void setBibleSearchActive();
+    // (Re)loads AI Bible assistant settings and (re)connects the transcript feed.
+    void loadAiAssistantSettings();
+    // Sends the current (possibly AI-preselected) verse live. Returns false if nothing is selected.
+    bool goLiveWithCurrentSelection();
 
 protected:
     virtual void changeEvent(QEvent *e);
@@ -87,6 +106,8 @@ private slots:
     void on_listChapterNum_currentTextChanged(QString currentText);
     void on_listBook_currentTextChanged(QString currentText);
     void addToHistory();
+    void applyAiSelection(const BibleSelection &selection, double confidence);
+    void onTranscriptLine(qint64 id, const QString &text);
 
 private:
     BibleVersionSettings mySettings;
@@ -97,6 +118,23 @@ private:
     QIntValidator *chapter_validator, *verse_validator;
     QByteArray hidden_splitter_state, shown_splitter_state;
     QButtonGroup search_type_buttongroup;
+
+    // AI Bible assistant
+    AiBibleSettings aiSettings;
+    TranscriptStream *transcript = nullptr;
+    BibleReferenceAssistant *assistant = nullptr;
+    QFrame *aiPanel = nullptr;
+    QPlainTextEdit *transcriptView = nullptr;
+    QLabel *aiStatus = nullptr;
+    QCheckBox *aiFollow = nullptr;
+    bool applyingAiSelection = false;
+    // Book/chapter/verse structure of the operator Bible, built once per Bible load.
+    mutable QList<BibleBookInfo> assistantBookCache;
+    mutable int assistantMaxVerseCache = 0;
+    void rebuildAssistantCache() const;
+    QElapsedTimer lastManualChange;
+    void setupAiPanel();
+    void noteManualChange();
 };
 
 #endif // BIBLEWIDGET_HPP

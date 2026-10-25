@@ -23,6 +23,7 @@
 #include <QStyleFactory>
 #include "../headers/softprojector.hpp"
 #include "../headers/openaisettings.hpp"
+#include "../headers/aibiblesettings.hpp"
 
 // Definitions for database versions 'dbVer' numbers
 // x - Official release. ex: 2 - for SoftProjector 2
@@ -109,6 +110,11 @@ bool connect(QString database_file)
         if (!OpenAiSettings::ensureTable(&settingsError)) {
             QMessageBox::critical(nullptr, QObject::tr("Database settings error"),
                 QObject::tr("Could not initialize OpenAI settings: %1").arg(settingsError));
+            return false;
+        }
+        if (!AiBibleSettings::ensureTable(&settingsError)) {
+            QMessageBox::critical(nullptr, QObject::tr("Database settings error"),
+                QObject::tr("Could not initialize AI Bible assistant settings: %1").arg(settingsError));
             return false;
         }
         return true;

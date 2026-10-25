@@ -20,6 +20,16 @@
 #include "../headers/biblewidget.hpp"
 #include "ui_biblewidget.h"
 #include "../headers/song.hpp"
+#include "../headers/transcriptstream.hpp"
+#include <QCheckBox>
+#include <QFrame>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPlainTextEdit>
+#include <QPushButton>
+#include <QScrollBar>
+#include <QTextCursor>
+#include <QSignalBlocker>
 //#include <time.h>
 
 //double diffclock(clock_t clock1,clock_t clock2)
@@ -43,10 +53,14 @@ BibleWidget::BibleWidget(QWidget *parent) :
 
     highlight = new HighlighterDelegate(ui->search_results_list);
     ui->search_results_list->setItemDelegate(highlight);
+
+    setupAiPanel();
 }
 
 BibleWidget::~BibleWidget()
 {
+    transcript->stop();
+    assistant->cancel();
     delete chapter_validator;
     delete verse_validator;
     delete ui;
@@ -89,6 +103,7 @@ void BibleWidget::loadBibles(QString initialId)
     {
         bible.setBiblesId(mySettings.operatorBible);
         bible.loadOperatorBible();
+        assistantBookCache.clear(); // rebuilt on the next AI request
         ui->listBook->clear();
         ui->listBook->addItems(bible.getBooks());
         ui->listBook->setCurrentRow(0);
@@ -97,6 +112,7 @@ void BibleWidget::loadBibles(QString initialId)
 
 void BibleWidget::on_listBook_currentTextChanged(QString currentText)
 {
+    noteManualChange();
     int s = ui->listBook->currentRow();
     if( s != -1 )
     {
@@ -118,6 +134,7 @@ void BibleWidget::on_listBook_currentTextChanged(QString currentText)
 
 void BibleWidget::on_listChapterNum_currentTextChanged(QString currentText)
 {
+    noteManualChange();
     int s = ui->listChapterNum->currentRow();
     if( s != -1 )
     {
@@ -170,6 +187,7 @@ bool BibleWidget::eventFilter(QObject *object, QEvent *event)
 
 void BibleWidget::on_chapter_preview_list_currentRowChanged(int currentRow)
 {
+    noteManualChange();
     ui->verse_ef->setText(QString::number(currentRow+1));
 }
 
@@ -195,6 +213,7 @@ void BibleWidget::sendToProjector(bool add_to_history)
 
 void BibleWidget::on_lineEditBook_textChanged(QString text)
 {
+    noteManualChange();
     if (text == "0") {
         ui->lineEditBook->clear();
         return;
@@ -589,4 +608,214 @@ void BibleWidget::setBibleSearchActive()
 {
     ui->search_ef->setFocus();
     ui->search_ef->selectAll();
+}
+
+// ---------------------------------------------------------------------------
+// AI Bible assistant
+// ---------------------------------------------------------------------------
+
+void BibleWidget::setupAiPanel()
+{
+    transcript = new TranscriptStream(this);
+    assistant = new BibleReferenceAssistant(this, this);
+
+    // Compact strip: transcript (two text lines) | AI status (two lines) | Follow.
+    aiPanel = new QFrame(this);
+    aiPanel->setObjectName("aiTranscriptStrip");
+    auto *panelLayout = new QHBoxLayout(aiPanel);
+    panelLayout->setContentsMargins(0, 0, 0, 0);
+    panelLayout->setSpacing(6);
+    transcriptView = new QPlainTextEdit(aiPanel);
+    transcriptView->setObjectName("aiTranscriptView");
+    transcriptView->setReadOnly(true);
+    transcriptView->setLineWrapMode(QPlainTextEdit::WidgetWidth);
+    transcriptView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    transcriptView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    transcriptView->setFocusPolicy(Qt::NoFocus);
+    transcriptView->setToolTip(tr("Live transcript (most recent text)."));
+    const int twoLines = transcriptView->fontMetrics().lineSpacing() * 2 +
+        2 * transcriptView->frameWidth() + 2 * int(transcriptView->document()->documentMargin()) + 2;
+    transcriptView->setFixedHeight(twoLines);
+    panelLayout->addWidget(transcriptView, 1);
+    aiStatus = new QLabel(aiPanel);
+    aiStatus->setTextFormat(Qt::PlainText);
+    aiStatus->setWordWrap(true);
+    aiStatus->setFixedHeight(twoLines);
+    aiStatus->setFixedWidth(280);
+    aiStatus->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    panelLayout->addWidget(aiStatus);
+    aiFollow = new QCheckBox(tr("Follow"), aiPanel);
+    aiFollow->setToolTip(tr("When checked, the AI preselects the book, chapter and verse the speaker names. "
+                            "Nothing is shown until you press F5 or Live."));
+    aiFollow->setChecked(true);
+    panelLayout->addWidget(aiFollow);
+    aiPanel->setFixedHeight(twoLines);
+    aiPanel->setVisible(false);
+    // Fixed height under the book/chapter/verse lists, so the Bible lists keep the space.
+    ui->verticalLayout_9->addWidget(aiPanel, 0);
+
+    connect(aiFollow, &QCheckBox::toggled, this, [this](bool follow) {
+        if (follow)
+            assistant->operatorTookOver(); // start fresh from the next spoken line
+        else
+            assistant->cancel();
+        aiStatus->setText(follow ? tr("Listening...") : tr("Not following the transcript."));
+    });
+    connect(transcript, &TranscriptStream::lineReceived, this, &BibleWidget::onTranscriptLine);
+    connect(transcript, &TranscriptStream::connected, this, [this]() {
+        aiStatus->setText(tr("Connected to transcript feed. Listening..."));
+    });
+    connect(transcript, &TranscriptStream::disconnected, this, [this](const QString &reason) {
+        if (transcript->isRunning())
+            aiStatus->setText(tr("%1 Reconnecting...").arg(reason));
+    });
+    connect(assistant, &BibleReferenceAssistant::suggestion, this, &BibleWidget::applyAiSelection);
+    connect(assistant, &BibleReferenceAssistant::statusChanged, aiStatus, &QLabel::setText);
+    connect(assistant, &BibleReferenceAssistant::failed, aiStatus, &QLabel::setText);
+}
+
+void BibleWidget::loadAiAssistantSettings()
+{
+    QString error;
+    AiBibleSettings loaded;
+    if (!loaded.load(&error)) {
+        loaded = AiBibleSettings();
+        loaded.enabled = false;
+    }
+    aiSettings = loaded;
+    transcript->stop();
+    assistant->setSettings(aiSettings);
+    aiPanel->setVisible(aiSettings.enabled);
+    if (!aiSettings.enabled)
+        return;
+    if (!aiSettings.isUsable()) {
+        aiStatus->setText(tr("AI Bible assistant is not fully configured. Open Settings > AI Bible Assistant."));
+        return;
+    }
+    aiStatus->setText(tr("Connecting to transcript feed..."));
+    transcript->start(QUrl(aiSettings.transcriptUrl.trimmed()));
+}
+
+void BibleWidget::onTranscriptLine(qint64 id, const QString &text)
+{
+    Q_UNUSED(id);
+    // Running text, not one line per message; only the last two visual lines are visible.
+    QString all = transcriptView->toPlainText();
+    if (!all.isEmpty())
+        all += ' ';
+    all += text;
+    if (all.size() > 1500)
+        all = all.right(1000);
+    transcriptView->setPlainText(all);
+    transcriptView->moveCursor(QTextCursor::End);
+    transcriptView->verticalScrollBar()->setValue(transcriptView->verticalScrollBar()->maximum());
+    if (aiFollow->isChecked())
+        assistant->addLine(text);
+}
+
+void BibleWidget::noteManualChange()
+{
+    if (applyingAiSelection)
+        return;
+    lastManualChange.restart();
+    if (assistant && aiSettings.enabled)
+        assistant->operatorTookOver();
+}
+
+bool BibleWidget::assistantPaused() const
+{
+    if (!aiFollow || !aiFollow->isChecked())
+        return true;
+    return lastManualChange.isValid() && aiSettings.pauseSeconds > 0 &&
+        lastManualChange.elapsed() < qint64(aiSettings.pauseSeconds) * 1000;
+}
+
+void BibleWidget::rebuildAssistantCache() const
+{
+    assistantBookCache.clear();
+    assistantMaxVerseCache = 0;
+    const QHash<int, QList<int> > counts = bible.allVerseCounts();
+    for (const BibleBook &b : bible.books)
+    {
+        BibleBookInfo info;
+        info.name = b.book;
+        info.chapterCount = b.chapterCount;
+        info.verseCounts = counts.value(b.bookId.toInt());
+        while (info.verseCounts.size() < info.chapterCount)
+            info.verseCounts.append(0);
+        for (int v : info.verseCounts)
+            assistantMaxVerseCache = qMax(assistantMaxVerseCache, v);
+        assistantBookCache.append(info);
+    }
+}
+
+QList<BibleBookInfo> BibleWidget::assistantBooks() const
+{
+    if (assistantBookCache.size() != bible.books.size())
+        rebuildAssistantCache();
+    return assistantBookCache;
+}
+
+int BibleWidget::assistantVerseCount(const QString &book, int chapter) const
+{
+    for (const BibleBookInfo &b : assistantBooks())
+        if (b.name == book)
+            return chapter >= 1 && chapter <= b.verseCounts.size() ? b.verseCounts.at(chapter - 1) : 0;
+    return 0;
+}
+
+int BibleWidget::assistantMaxVerses() const
+{
+    assistantBooks();
+    return assistantMaxVerseCache;
+}
+
+BibleSelection BibleWidget::assistantSelection() const
+{
+    BibleSelection selection;
+    if (ui->listBook->currentItem())
+        selection.book = ui->listBook->currentItem()->text();
+    if (ui->listChapterNum->currentItem())
+        selection.chapter = ui->listChapterNum->currentItem()->text().toInt();
+    if (ui->chapter_preview_list->currentRow() >= 0)
+        selection.verse = ui->chapter_preview_list->currentRow() + 1;
+    return selection;
+}
+
+void BibleWidget::applyAiSelection(const BibleSelection &selection, double confidence)
+{
+    const QStringList all_books = bible.getBooks();
+    const int bookRow = all_books.indexOf(selection.book);
+    if (bookRow < 0)
+        return;
+    applyingAiSelection = true;
+    {
+        // Drop any book filter so the suggested book is visible in the list.
+        QSignalBlocker blocker(ui->lineEditBook);
+        ui->lineEditBook->clear();
+    }
+    if (ui->listBook->count() != all_books.count())
+    {
+        ui->listBook->clear();
+        ui->listBook->addItems(all_books);
+    }
+    ui->listBook->setCurrentRow(bookRow);
+    const int chapter = qBound(1, selection.chapter, qMax(1, ui->listChapterNum->count()));
+    if (ui->listChapterNum->currentRow() != chapter - 1)
+        ui->listChapterNum->setCurrentRow(chapter - 1);
+    const int verse = qBound(1, selection.verse, qMax(1, ui->chapter_preview_list->count()));
+    ui->chapter_preview_list->clearSelection();
+    ui->chapter_preview_list->setCurrentRow(verse - 1);
+    if (ui->chapter_preview_list->currentItem())
+        ui->chapter_preview_list->scrollToItem(ui->chapter_preview_list->currentItem(), QAbstractItemView::PositionAtCenter);
+    applyingAiSelection = false;
+    Q_UNUSED(confidence); // shown in the status text by the assistant
+}
+
+bool BibleWidget::goLiveWithCurrentSelection()
+{
+    if (!ui->btnLive->isEnabled() || !isVerseSelected())
+        return false;
+    sendToProjector(true);
+    return true;
 }

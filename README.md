@@ -52,3 +52,23 @@ openai-translation-tests.exe -platform offscreen
 ```
 
 On Unix, use `make` and `./openai-translation-tests` for the last two commands.
+
+#### AI Bible assistant (live transcript)
+
+Open **Settings > AI Bible Assistant**, check **Enable AI Bible assistant**, and enter an [OpenRouter](https://openrouter.ai) API key, the decision model (default `cloudflare/clef-flash`), and the URL of a live transcript feed. The feed must be a Server-Sent Events stream whose `data:` lines are JSON objects such as `{"id": 3322, "text": "..."}`; comment lines such as `: keep-alive` are ignored, duplicate ids are skipped, and the connection reconnects automatically.
+
+When enabled, a two-line strip appears under the Bible book/chapter/verse lists showing the most recent transcript as running text, with the AI status and a **Follow** checkbox beside it. In the background, each new batch of lines is sent to the OpenRouter [Decisions API](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request) with the operator Bible's book list and the current selection. Clef is a decision model that answers multiple-choice questions rather than writing text. Each batch of lines is a single request asking four questions at once (*is a reference spoken? which book? which chapter number? which verse number?*); the chapter and verse answers are plain numbers that the application checks against the chosen book, so one round trip is enough. Each request also carries the operator Bible's full structure (every book name in that Bible's language with the verse count of each chapter, about 4,400 characters) and the current book, chapter, and verse, so the model knows which references exist. Request and end-to-end timings are logged. A spoken book alone selects that book; a chapter or verse spoken later, even after several lines of commentary, refines it (recent reference lines are remembered for five minutes). Every request and answer is written to `ai-bible-assistant.log` next to `SoftProjector.exe` for troubleshooting. The result is only **preselected** in the Bible tab and never shown automatically. Press **F5** (from any tab) or **Live** to show it. Only references that are spoken aloud are detected, not quoted verse text.
+
+**Minimum confidence** controls how sure the model must be before the selection changes. After you change the Bible selection yourself, the assistant waits for **Pause after manual change** seconds and ignores lines spoken in the meantime, so it does not undo your choice. Uncheck **Follow** in the strip to stop it from changing the selection while still showing the transcript.
+
+Settings are stored in the `AiBibleSettings` table in `spData.sqlite`, created on startup. The OpenRouter API key is stored **without encryption**. Recent transcript lines (a few hundred characters per request) are sent to OpenRouter.
+
+Offline tests for the transcript parser, decision chain, and settings use mock HTTP responses:
+
+```text
+mkdir src/build/ai-bible-assistant-tests
+cd src/build/ai-bible-assistant-tests
+qmake ../../tests/ai-bible-assistant.pro
+mingw32-make
+ai-bible-assistant-tests.exe
+```
