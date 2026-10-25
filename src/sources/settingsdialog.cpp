@@ -39,6 +39,10 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->scrollAreaSongSettings->setWidget(songSettingswidget);
     ui->scrollAreaPicture->setWidget(pictureSettingWidget);
     ui->scrollAreaAnnouncementSettings->setWidget(announcementSettingswidget);
+    openAiSettingsWidget = new OpenAiSettingsWidget(this);
+    ui->stackedWidget->addWidget(openAiSettingsWidget);
+    new QListWidgetItem(QIcon(":/icons/icons/translation.png"), tr("OpenAI Translation"), ui->listWidget);
+    connect(this, &QDialog::finished, openAiSettingsWidget, &OpenAiSettingsWidget::cancelRequest);
 
     btnOk = new QPushButton(tr("OK"));
     btnCancel = new QPushButton(tr("Cancel"));
@@ -88,6 +92,7 @@ void SettingsDialog::loadSettings(GeneralSettings &sets, Theme &thm, SlideShowSe
     generalSettingswidget->setSettings(gsettings);
     bibleSettingswidget->setBibleVersions(bsettings,bsettings2,bsettings3,bsettings4);
     pictureSettingWidget->setSettings(ssettings);
+    openAiSettingsWidget->loadSettings();
     setThemes();
 }
 
@@ -112,6 +117,7 @@ void SettingsDialog::changeEvent(QEvent *e)
     switch ( e->type() ) {
     case QEvent::LanguageChange:
         ui->retranslateUi(this);
+        ui->listWidget->item(ui->listWidget->count() - 1)->setText(tr("OpenAI Translation"));
         break;
     default:
         break;
@@ -151,17 +157,19 @@ void SettingsDialog::on_buttonBox_clicked(QAbstractButton *button)
 {
     if(button == btnOk)
     {
-        applySettings();
-        close();
+        if (applySettings())
+            accept();
     }
     else if(button == btnCancel)
-        close();
+        reject();
     else if(button == btnApply)
         applySettings();
 }
 
-void SettingsDialog::applySettings()
+bool SettingsDialog::applySettings()
 {
+    if (!openAiSettingsWidget->saveSettings())
+        return false;
     gsettings = generalSettingswidget->getSettings();
     bibleSettingswidget->getBibleVersions(bsettings,bsettings2,bsettings3,bsettings4);
     pictureSettingWidget->getSettings(ssettings);
@@ -205,6 +213,7 @@ void SettingsDialog::applySettings()
     currentHTTPServerIPAddress = gsettings.httpServerIPAddress;
     currentHTTPPort = gsettings.httpServerPort;
     currentWebSocketPort = gsettings.webSocketServerPort;
+    return true;
 }
 
 void SettingsDialog::getThemes()

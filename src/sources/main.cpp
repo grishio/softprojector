@@ -22,6 +22,7 @@
 #include <QtSql>
 #include <QStyleFactory>
 #include "../headers/softprojector.hpp"
+#include "../headers/openaisettings.hpp"
 
 // Definitions for database versions 'dbVer' numbers
 // x - Official release. ex: 2 - for SoftProjector 2
@@ -102,6 +103,13 @@ bool connect(QString database_file)
                     "'add_background_color_to_text' BOOL, 'text_rec_background_color' INTEGER, 'text_gen_background_color' INTEGER)");
             //sq.exec("CREATE TABLE 'ThemeData' ('theme_id' INTEGER, 'type' TEXT, 'sets' TEXT)");
             sq.exec("CREATE TABLE 'Themes' ('id' INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL , 'name' TEXT, 'comment' TEXT)");
+        }
+        // Add application-wide API settings for both new and existing databases.
+        QString settingsError;
+        if (!OpenAiSettings::ensureTable(&settingsError)) {
+            QMessageBox::critical(nullptr, QObject::tr("Database settings error"),
+                QObject::tr("Could not initialize OpenAI settings: %1").arg(settingsError));
+            return false;
         }
         return true;
     }

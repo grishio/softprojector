@@ -72,6 +72,7 @@ private slots:
     bool validateSong();
     void on_btnCancel_clicked();
     void on_btnSave_clicked();
+    void on_pushButtonTranslate_clicked();
     void resetUiItems();
     void setUiItems();
     void setSave();

@@ -29,6 +29,7 @@
 #include "songsettingwidget.hpp"
 #include "announcementsettingwidget.hpp"
 #include "picturesettingwidget.hpp"
+#include "openaisettingswidget.hpp"
 
 namespace Ui {
 class SettingsDialog;
@@ -84,6 +85,7 @@ private:
     SongSettingWidget *songSettingswidget;
     PictureSettingWidget *pictureSettingWidget;
     AnnouncementSettingWidget *announcementSettingswidget;
+    OpenAiSettingsWidget *openAiSettingsWidget;
 
     QPushButton *btnOk;
     QPushButton *btnCancel;
@@ -95,7 +97,7 @@ private slots:
     void setUseDispScreen3(bool toUse);
     void setUseDispScreen4(bool toUse);
     void on_buttonBox_clicked(QAbstractButton *button);
-    void applySettings();
+    bool applySettings();
     void changeTheme(int theme_id);
     void getThemes();
     void setThemes();

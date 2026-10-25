@@ -95,6 +95,11 @@ SOURCES += sources/main.cpp \
     sources/mediacontrol.cpp \
     sources/httpserver.cpp \
     sources/websocketserver.cpp
+SOURCES += sources/openaisettings.cpp \
+    sources/songtranslation.cpp \
+    sources/openaiclient.cpp \
+    sources/openaisettingswidget.cpp \
+    sources/songtranslationdialog.cpp
 HEADERS += headers/softprojector.hpp \
     ../3rdparty/headers/qmediaplaylist.h \
     ../3rdparty/headers/qmediaplaylist_p.h \
@@ -143,6 +148,11 @@ HEADERS += headers/softprojector.hpp \
     headers/mediacontrol.hpp \
     headers/httpserver.hpp \
     headers/websocketserver.hpp
+HEADERS += headers/openaisettings.hpp \
+    headers/songtranslation.hpp \
+    headers/openaiclient.hpp \
+    headers/openaisettingswidget.hpp \
+    headers/songtranslationdialog.hpp
 FORMS += ui/softprojector.ui \
     ui/songwidget.ui \
     ui/biblewidget.ui \

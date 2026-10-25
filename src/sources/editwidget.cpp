@@ -20,6 +20,8 @@
 #include "../headers/editwidget.hpp"
 #include "ui_editwidget.h"
 #include "../headers/song.hpp"
+#include "../headers/songtranslationdialog.hpp"
+#include <QTextCursor>
 
 EditWidget::EditWidget(QWidget *parent) :
     QWidget(parent),
@@ -83,7 +85,8 @@ bool EditWidget::validateSong()
         }
     }
 
-    for (const QString &verse : qAsConst(lyrics)) {
+    const QStringList &constantLyrics = lyrics;
+    for (const QString &verse : constantLyrics) {
         if (!verse.contains("=")) { continue; }
 
         QStringList split = verse.split("=");
@@ -135,6 +138,41 @@ void EditWidget::on_btnSave_clicked()
 
     resetUiItems();
     close();
+}
+
+void EditWidget::on_pushButtonTranslate_clicked()
+{
+    OpenAiSettings settings;
+    QString error;
+    if (!settings.load(&error)) {
+        QMessageBox::warning(this, tr("OpenAI settings"), tr("Could not load OpenAI settings: %1").arg(error));
+        return;
+    }
+    if (settings.apiKey.trimmed().isEmpty()) {
+        QMessageBox::information(this, tr("OpenAI settings"),
+            tr("Enter your API key and select a model in Settings > OpenAI Translation, then click Apply or OK."));
+        return;
+    }
+    if (settings.model.trimmed().isEmpty()) {
+        QMessageBox::information(this, tr("OpenAI settings"),
+            tr("Select an available model in Settings > OpenAI Translation, then click Apply or OK."));
+        return;
+    }
+    const QString original = ui->textEditSong->toPlainText();
+    SongTranslationDialog dialog(original, ui->lineEditTitle->text(), settings, this);
+    if (dialog.exec() != QDialog::Accepted)
+        return;
+    // Guard against another event changing the editor while a request was pending.
+    if (ui->textEditSong->toPlainText() != original) {
+        QMessageBox::warning(this, tr("Song changed"), tr("The song changed while translating. Generate a new proposal for the current lyrics."));
+        return;
+    }
+    QTextCursor cursor(ui->textEditSong->document());
+    cursor.beginEditBlock();
+    cursor.select(QTextCursor::Document);
+    cursor.insertText(dialog.proposedSongText());
+    cursor.endEditBlock();
+    ui->checkBoxUseTranslation->setChecked(true);
 }
 
 void EditWidget::setArrowCursor()

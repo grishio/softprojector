@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <title>Song translation</title>
+  <desc>Overlapping blue and green language tiles with Latin A and Cyrillic Ya.</desc>
+  <defs>
+    <linearGradient id="blue" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#b6d7ff"/>
+      <stop offset="0.45" stop-color="#6b9eea"/>
+      <stop offset="1" stop-color="#3153b9"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#c4f28e"/>
+      <stop offset="0.45" stop-color="#70cd55"/>
+      <stop offset="1" stop-color="#249446"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="25" cy="45" rx="21" ry="2.4" fill="#172a38" opacity="0.18"/>
+  <rect x="3" y="3" width="28" height="30" rx="4" fill="url(#blue)" stroke="#243b8c" stroke-width="2"/>
+  <rect x="4.5" y="4.5" width="25" height="27" rx="2.7" fill="none" stroke="#ffffff" stroke-opacity="0.65"/>
+  <path d="M5 7 Q5 5 7 5 H27 Q29 5 29 7 V13 Q17 17 5 14 Z" fill="#ffffff" opacity="0.2"/>
+  <path d="M8 26 L14.5 10 H18.5 L25 26 H20.7 L19.3 22 H13.7 L12.3 26 Z M14.8 18.7 H18.2 L16.5 13.7 Z"
+        fill="#ffffff" fill-rule="evenodd" stroke="#284981" stroke-width="0.65" stroke-linejoin="round"/>
+  <rect x="19" y="17" width="26" height="28" rx="4" fill="url(#green)" stroke="#1b6636" stroke-width="2"/>
+  <rect x="20.5" y="18.5" width="23" height="25" rx="2.7" fill="none" stroke="#ffffff" stroke-opacity="0.65"/>
+  <path d="M21 21 Q21 19 23 19 H41 Q43 19 43 21 V27 Q33 30 21 27 Z" fill="#ffffff" opacity="0.24"/>
+  <path d="M39 23 V40 H35.2 V33.5 H32.7 L28.6 40 H24.1 L29 32.8 C26.5 32 25 30.6 25 28.1 C25 24.6 27.4 23 31.5 23 Z
+           M35.2 26.2 H31.8 C29.7 26.2 28.7 26.8 28.7 28.2 C28.7 29.7 29.7 30.3 31.8 30.3 H35.2 Z"
+        fill="#ffffff" fill-rule="evenodd" stroke="#276b3b" stroke-width="0.65" stroke-linejoin="round"/>
+</svg>

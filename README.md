@@ -24,3 +24,31 @@ When you go live, the split list will show below the full verses. Simply use you
 ![267142147-35343950-036b-433e-bbba-28600d464c01](https://github.com/user-attachments/assets/8c24ea6c-ea59-4b38-8b7d-36c22f68e7a1)
 #### For parallel verses, add the translation to your song using '='
 ![vers-tra](https://github.com/user-attachments/assets/5e2d0975-2fb9-4d0a-be0f-17471f30f009)
+
+#### Translate songs with OpenAI
+
+Open **Settings > OpenAI Translation**, enter your OpenAI API key, and click **Refresh available models** to query models available to your account. There are no preset model IDs or automatic selections. Choose a text model that supports structured output, select its thinking effort, then click **Apply** or **OK**. **Model default** omits the effort parameter. The model-list API does not report supported efforts; an unsupported effort produces an error directing you to use Model default or a supported effort.
+
+Models are ordered newest first using the API's model creation timestamps, with undated models last. Type in the model field to filter by any part of a name, regardless of case, then select a matching result. Search text is not saved as a model ID.
+
+The selected model is remembered in SQLite and verified when reopening Settings and before each translation. If it is retired or your key loses access, the saved selection is cleared and you must choose a replacement. Temporary network, authentication, quota, and server errors preserve the selection. No replacement is chosen automatically.
+
+In the song editor, click **Translate...**, then **Translate**. Translation direction is automatic for each line: Russian or Ukrainian becomes English, and English becomes Russian. Mixed-language verses and choruses follow the same rules line by line; there is no target-language selector. Review the current song alongside the proposal and edit words directly in the proposal before accepting. Keep the stanza headings, `=` separators, and matching line counts. **Re-translate** replaces the proposal with a new translation from the original lyrics. **Accept translation** applies the edited proposal to the editor and enables **Use Translation**; the existing **Save** button commits it to the database and checks line counts. Cancelling the preview leaves the editor unchanged, and cancelling the editor discards accepted changes.
+
+Translations preserve stanza headings and original lyric text, stanza order, and matching line counts, and replace existing text after each `=` separator. Windows newlines are normalized and blank lines inside stanzas removed. Parenthesized lyrics and repetition instructions are translated and kept in parentheses on the same line. Original headings appear only above `=` and are never translated. Songs need recognized stanza headings such as `Verse 1`, `Chorus`, or `Slide 1`. Invalid, refused, incomplete, or failed API responses cannot be accepted.
+
+The application creates an `OpenAiSettings` table in `spData.sqlite` on startup, including for existing databases. It stores the API key, model, and thinking effort independently of display themes. The API key is masked in the UI but stored **without encryption** in SQLite. Translation sends the title and original lyrics directly to OpenAI over HTTPS; ordinary song editing works without an API key.
+
+The integration uses Qt Network HTTP calls to the [Models API](https://developers.openai.com/api/reference/resources/models/methods/list), [Responses API](https://developers.openai.com/api/reference/responses/overview), [Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses), and [reasoning efforts](https://developers.openai.com/api/docs/guides/reasoning). No additional SDK is required.
+
+Offline regression tests use temporary SQLite databases and mock HTTP responses, with no API key or billable requests. Build from a Qt compiler shell:
+
+```text
+mkdir src/build/openai-translation-tests
+cd src/build/openai-translation-tests
+qmake ../../tests/openai-translation.pro
+mingw32-make
+openai-translation-tests.exe -platform offscreen
+```
+
+On Unix, use `make` and `./openai-translation-tests` for the last two commands.
