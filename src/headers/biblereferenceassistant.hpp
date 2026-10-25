@@ -8,6 +8,7 @@
 #include <QPointer>
 #include <QStringList>
 #include "aibiblesettings.hpp"
+#include "biblequoteindex.hpp"
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -43,6 +44,8 @@ public:
     // Largest verse number in any chapter (sizes the verse question's labels).
     virtual int assistantMaxVerses() const = 0;
     virtual BibleSelection assistantSelection() const = 0;
+    // Verses the transcript text may be quoting (local fuzzy search), best first.
+    virtual QList<VerseCandidate> assistantQuoteCandidates(const QString &text) const = 0;
     virtual bool assistantPaused() const = 0;
 };
 
@@ -104,6 +107,8 @@ private:
         qint64 runStartMs = 0;
         qint64 networkMs = 0;
         int requests = 0;
+        QList<VerseCandidate> quotes; // local candidates offered to the model
+        bool fromQuote = false;        // selection came from an uncited reading
     };
 
     BibleSelectionProvider *provider;

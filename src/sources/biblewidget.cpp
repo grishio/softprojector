@@ -747,6 +747,35 @@ void BibleWidget::rebuildAssistantCache() const
             assistantMaxVerseCache = qMax(assistantMaxVerseCache, v);
         assistantBookCache.append(info);
     }
+
+    // Index of verse texts for detecting uncited readings. Split verses that
+    // share a verse number are merged, as in the chapter preview.
+    QHash<int, QString> bookNames;
+    for (const BibleBook &b : bible.books)
+        bookNames.insert(b.bookId.toInt(), b.book);
+    QList<QuoteVerse> quoteVerses;
+    for (const BibleVerse &bv : bible.operatorVerses())
+    {
+        if (!quoteVerses.isEmpty() && quoteVerses.last().verse == bv.verseNumber &&
+            quoteVerses.last().chapter == bv.chapter && quoteVerses.last().book == bookNames.value(bv.book))
+        {
+            quoteVerses.last().text += " " + bv.verseText;
+            continue;
+        }
+        QuoteVerse qv;
+        qv.book = bookNames.value(bv.book);
+        qv.chapter = bv.chapter;
+        qv.verse = bv.verseNumber;
+        qv.text = bv.verseText;
+        quoteVerses.append(qv);
+    }
+    quoteIndex.build(quoteVerses);
+}
+
+QList<VerseCandidate> BibleWidget::assistantQuoteCandidates(const QString &text) const
+{
+    assistantBooks(); // builds the index on first use
+    return quoteIndex.search(text);
 }
 
 QList<BibleBookInfo> BibleWidget::assistantBooks() const

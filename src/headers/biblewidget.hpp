@@ -59,6 +59,7 @@ public:
     QList<BibleBookInfo> assistantBooks() const override;
     int assistantVerseCount(const QString &book, int chapter) const override;
     int assistantMaxVerses() const override;
+    QList<VerseCandidate> assistantQuoteCandidates(const QString &text) const override;
     BibleSelection assistantSelection() const override;
     bool assistantPaused() const override;
 
@@ -131,6 +132,7 @@ private:
     // Book/chapter/verse structure of the operator Bible, built once per Bible load.
     mutable QList<BibleBookInfo> assistantBookCache;
     mutable int assistantMaxVerseCache = 0;
+    mutable BibleQuoteIndex quoteIndex;
     void rebuildAssistantCache() const;
     QElapsedTimer lastManualChange;
     void setupAiPanel();

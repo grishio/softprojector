@@ -8,7 +8,9 @@ TARGET = ai-bible-assistant-tests
 SOURCES += tst_aibibleassistant.cpp \
     ../sources/aibiblesettings.cpp \
     ../sources/biblereferenceassistant.cpp \
-    ../sources/transcriptstream.cpp
+    ../sources/transcriptstream.cpp \
+    ../sources/biblequoteindex.cpp
 HEADERS += ../headers/aibiblesettings.hpp \
     ../headers/biblereferenceassistant.hpp \
-    ../headers/transcriptstream.hpp
+    ../headers/transcriptstream.hpp \
+    ../headers/biblequoteindex.hpp

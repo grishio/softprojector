@@ -100,6 +100,7 @@ SOURCES += sources/openaisettings.cpp \
     sources/aibiblesettingswidget.cpp \
     sources/transcriptstream.cpp \
     sources/biblereferenceassistant.cpp \
+    sources/biblequoteindex.cpp \
     sources/songtranslation.cpp \
     sources/openaiclient.cpp \
     sources/openaisettingswidget.cpp \
@@ -157,6 +158,7 @@ HEADERS += headers/openaisettings.hpp \
     headers/aibiblesettingswidget.hpp \
     headers/transcriptstream.hpp \
     headers/biblereferenceassistant.hpp \
+    headers/biblequoteindex.hpp \
     headers/songtranslation.hpp \
     headers/openaiclient.hpp \
     headers/openaisettingswidget.hpp \

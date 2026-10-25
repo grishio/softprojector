@@ -10,6 +10,7 @@
 #include "../headers/aibiblesettings.hpp"
 #include "../headers/biblereferenceassistant.hpp"
 #include "../headers/transcriptstream.hpp"
+#include "../headers/biblequoteindex.hpp"
 
 namespace {
 class MockReply : public QNetworkReply
@@ -103,6 +104,8 @@ public:
     }
     int assistantVerseCount(const QString &, int) const override { return 24; }
     int assistantMaxVerses() const override { return 176; }
+    QList<VerseCandidate> quotes;
+    QList<VerseCandidate> assistantQuoteCandidates(const QString &) const override { return quotes; }
     BibleSelection assistantSelection() const override { return selection; }
     bool assistantPaused() const override { return paused; }
 };
@@ -247,6 +250,46 @@ private slots:
         QCOMPARE(BibleReferenceAssistant::bestNumber(a, "chapter", 21, &p), 14);
         QCOMPARE(p, 0.3);
         QCOMPARE(BibleReferenceAssistant::bestNumber(a, "chapter", 150, &p), 140);
+    }
+
+    void quoteIndexFindsReadingDespiteRecognitionErrors()
+    {
+        BibleQuoteIndex index;
+        index.build({
+            QuoteVerse{QString::fromUtf8("Псалтирь"), 138, 3, QString::fromUtf8("Иду ли я, отдыхаю ли — Ты окружаешь меня, и все пути мои известны Тебе.")},
+            QuoteVerse{QString::fromUtf8("Неемия"), 4, 17, QString::fromUtf8("Строившие стену и носившие тяжести, которые налагали [на них], одною рукою производили работу, а другою держали копье.")},
+            QuoteVerse{QString::fromUtf8("Бытие"), 1, 1, QString::fromUtf8("В начале сотворил Бог небо и землю.")}});
+        const QList<VerseCandidate> psalm = index.search(QString::fromUtf8("Иду ли я, отдыхаю ли, Ты окружаешь меня, и все пути мои известны тебе, еще не"));
+        QVERIFY(!psalm.isEmpty());
+        QCOMPARE(psalm.first().caption(), QString::fromUtf8("Псалтирь 138:3"));
+        const QList<VerseCandidate> neh = index.search(QString::fromUtf8("тяжесці, которыя налагалі на них, адной рукою производилі работу, а другой держали копье."));
+        QVERIFY(!neh.isEmpty());
+        QCOMPARE(neh.first().caption(), QString::fromUtf8("Неемия 4:17"));
+        QVERIFY(index.search(QString::fromUtf8("Мы можем думать, что Бог где-то там далеко от нас. Он всегда с нами.")).isEmpty());
+    }
+
+    void confirmedReadingIsPreselectedInSameRequest()
+    {
+        MockNetwork network;
+        FakeBible bible;
+        VerseCandidate c;
+        c.book = QString::fromUtf8("Псалтирь");
+        c.chapter = 138;
+        c.verse = 3;
+        c.text = QString::fromUtf8("Иду ли я, отдыхаю ли — Ты окружаешь меня");
+        bible.quotes = {c};
+        BibleReferenceAssistant assistant(&bible, nullptr, &network);
+        assistant.setSettings(usable());
+        QSignalSpy spy(&assistant, &BibleReferenceAssistant::suggestion);
+        QJsonObject a = QJsonDocument::fromJson(decide(0.1, "keep", 0.9)).object().value("answers").toObject();
+        a.insert("quote", choice(QString::fromUtf8("Псалтирь 138:3"), 0.88));
+        network.script = {{answers(a)}};
+        assistant.addLine(QString::fromUtf8("Иду ли я, отдыхаю ли, Ты окружаешь меня"));
+        QTRY_COMPARE(int(spy.count()), 1);
+        QCOMPARE(int(network.requests.size()), 1);
+        const BibleSelection s = spy.at(0).at(0).value<BibleSelection>();
+        QCOMPARE(s.caption(), QString::fromUtf8("Псалтирь 138:3"));
+        QVERIFY(network.bodies.first().value("questions").toObject().contains("quote"));
     }
 
     void noReferenceStopsAfterOneCall()

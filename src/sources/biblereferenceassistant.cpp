@@ -183,7 +183,17 @@ void BibleReferenceAssistant::evaluate()
         hints << hint.second;
     if (!hints.isEmpty())
         job.state.insert("recent_reference_lines", hints.join(" / "));
+    // Uncited readings: the previous line plus the new lines, searched locally.
+    QString quoteText = from > 0 ? lines.at(from - 1) + ' ' : QString();
+    quoteText += QStringList(lines.mid(from)).join(' ');
+    job.quotes = provider->assistantQuoteCandidates(quoteText);
     emit statusChanged(tr("Analyzing transcript..."));
+    if (!job.quotes.isEmpty()) {
+        QStringList captions;
+        for (const VerseCandidate &c : job.quotes)
+            captions << QString("%1 (%2)").arg(c.caption()).arg(c.score);
+        writeLog("quote candidates: " + captions.join(", "));
+    }
     writeLog(QString("run current=%1 | earlier=%2 | new=%3")
              .arg(job.state.value("current_selection").toString(), job.state.value("earlier_lines").toString(),
                   job.state.value("new_lines").toString()).replace('\n', " / "));
@@ -300,6 +310,21 @@ void BibleReferenceAssistant::sendRequest()
         numberLabels(maxVerses),
         "No verse number is spoken in new_lines, or it is the verse already in current_selection."));
 
+    // Possible uncited reading: only asked when the local search found candidates.
+    if (!job.quotes.isEmpty()) {
+        QJsonObject criteria;
+        criteria.insert(KeepLabel, QStringLiteral("The speaker is not reading any of these verses (only talking, "
+                                                  "paraphrasing loosely, or reading a different passage)."));
+        for (const VerseCandidate &c : job.quotes)
+            criteria.insert(c.caption(), c.text.left(400));
+        questions.insert("quote", QJsonObject{
+            {"type", "choice"},
+            {"instructions", QString("Is the speaker reading aloud one of these Bible verses in new_lines (earlier_lines may "
+                                     "hold the start of the reading)? The wording may differ slightly because of speech "
+                                     "recognition errors. Choose the verse being read, or keep. ") + asr},
+            {"criteria", criteria}});
+    }
+
     // Full Bible structure (operator Bible's own book names, verses per chapter).
     // Added to this request only; the log keeps the shorter job.state.
     QJsonObject available;
@@ -386,10 +411,37 @@ void BibleReferenceAssistant::handleReply(QNetworkReply *reply, int jobGeneratio
         return;
     }
 
+    const double threshold = settings.minConfidence;
+    // Uncited reading: the model confirms one of the locally found verses.
+    const VerseCandidate *quote = nullptr;
+    double quoteP = 0.0;
+    if (!job.quotes.isEmpty()) {
+        const QString label = chosenLabel(answers, "quote", &quoteP);
+        for (const VerseCandidate &c : job.quotes)
+            if (c.caption() == label && quoteP >= threshold)
+                quote = &c;
+    }
+    auto applyQuote = [this, &quote, quoteP]() {
+        if (!quote)
+            return;
+        job.book = quote->book;
+        job.chapter = quote->chapter;
+        job.verse = quote->verse;
+        job.bookChanged = job.book != job.start.book;
+        job.chapterChanged = job.bookChanged || job.chapter != job.start.chapter;
+        job.verseChanged = true;
+        job.confidence = quoteP;
+        job.fromQuote = true;
+    };
+
     const double reference = answers.value("reference").toObject().value("noul").toDouble(0.0);
     if (reference < ReferenceThreshold) {
-        emit statusChanged(tr("Listening... (no reference in the latest lines)"));
-        job.reported = true;
+        if (quote) {
+            applyQuote();
+        } else {
+            emit statusChanged(tr("Listening... (no reference in the latest lines)"));
+            job.reported = true;
+        }
         finishJob();
         return;
     }
@@ -397,7 +449,6 @@ void BibleReferenceAssistant::handleReply(QNetworkReply *reply, int jobGeneratio
     while (referenceLines.size() > MaxReferenceLines)
         referenceLines.removeFirst();
 
-    const double threshold = settings.minConfidence;
     // Book.
     double p = 0.0;
     const QString book = chosenLabel(answers, "book", &p);
@@ -411,6 +462,11 @@ void BibleReferenceAssistant::handleReply(QNetworkReply *reply, int jobGeneratio
         job.chapter = 1;
         job.verse = 1;
         job.confidence = qMin(job.confidence, p);
+    }
+    if (job.book.isEmpty() && quote) {
+        applyQuote();
+        finishJob();
+        return;
     }
     if (job.book.isEmpty()) {
         emit statusChanged(tr("Listening... (no book selected yet)"));
@@ -442,6 +498,9 @@ void BibleReferenceAssistant::handleReply(QNetworkReply *reply, int jobGeneratio
             job.confidence = qMin(job.confidence, p);
         }
     }
+    // A spoken reference wins; otherwise use a confirmed reading.
+    if (!job.bookChanged && !job.chapterChanged && !job.verseChanged)
+        applyQuote();
     finishJob();
 }
 
@@ -459,8 +518,10 @@ void BibleReferenceAssistant::finishJob()
         selection.verse = job.verse;
         if (selection != provider->assistantSelection() && !provider->assistantPaused()) {
             emit suggestion(selection, job.confidence);
-            writeLog(QString("preselect %1 confidence %2").arg(selection.caption()).arg(job.confidence, 0, 'f', 2));
-            emit statusChanged(tr("Preselected %1 (%2% confident, %3 s). Press F5 to show.")
+            writeLog(QString("preselect %1 confidence %2%3").arg(selection.caption()).arg(job.confidence, 0, 'f', 2)
+                     .arg(job.fromQuote ? QStringLiteral(" (uncited reading)") : QString()));
+            emit statusChanged((job.fromQuote ? tr("Reading recognized: %1 (%2% confident, %3 s). Press F5 to show.")
+                                              : tr("Preselected %1 (%2% confident, %3 s). Press F5 to show."))
                                .arg(selection.caption()).arg(qRound(job.confidence * 100))
                                .arg(sinceLineMs / 1000.0, 0, 'f', 1));
         }

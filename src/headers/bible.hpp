@@ -103,6 +103,7 @@ public slots:
     int maxVerseNumber() const;
     // Verse count of every chapter, keyed by book id (index 0 = chapter 1).
     QHash<int, QList<int> > allVerseCounts() const;
+    const QList<BibleVerse> &operatorVerses() const { return operatorBible; }
     void getVerseAndCaption(QString &verse, QString &caption, QString verId, QString &bibId, bool useAbbr);
     int getCurrentBookRow(QString book);
     Verse getCurrentVerseAndCaption(QList<int> currentRows, BibleSettings& sets, BibleVersionSettings& bv);
